@@ -62,15 +62,15 @@ ClassMethod InsertJSON() As %Status
 	}
   	  	
   	If $$$ISOK(st) {
-	       set st = f.%Save() 
-	       If $$$ISOK(st) {	        
-              do result.%Set("Status","OK")           
-	       } else {		       
-          	  do result.%Set("Message",$system.Status.GetOneErrorText(st))  
-		   }
-        } else {	       
-           do result.%Set("Message",$system.Status.GetOneErrorText(st))  
-        }     
+	  set st = f.%Save() 
+	  If $$$ISOK(st) {	        
+         do result.%Set("Status","OK")           
+	  } else {		       
+         do result.%Set("Message",$system.Status.GetOneErrorText(st))  
+	  }
+    } else {	       
+       do result.%Set("Message",$system.Status.GetOneErrorText(st))  
+    }     
   }
  
   write result.%ToJSON() 
@@ -80,33 +80,24 @@ ClassMethod InsertJSON() As %Status
 ClassMethod InsertJSONSmall() As %Status
 {
   Set result={}
-  Set st=0  
+  Set st=0 
   
-  set st = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(%request.Content, "%ZEN.proxyObject", .s)  
-  If $$$ISOK(st) {    
-  	set f = ##class(RestTransfer.FileDesc).%New()   
-  	if (f = $$$NULLOREF) {	  
-	  do result.%Set("Message", "Couldn't create an instance of class")  
-  	} else {     	     	
-    	set f.Name = s.Name
-    	set st = f.File.Write($replace(s.File, "\v", $c(11)))
-    	    	    	    	
-        If $$$ISOK(st) {
-	       set st = f.%Save() 
-	       If $$$ISOK(st) {	        
-              do result.%Set("Status","OK")           
-	       } else {		       
-          	  do result.%Set("Message",$system.Status.GetOneErrorText(st))  
-		   }
-        } else {	       
-           do result.%Set("Message",$system.Status.GetOneErrorText(st))  
-        }     
- 	 } 
-  } else
-  {
-	  do result.%Set("Message",$system.Status.GetOneErrorText(st))  
+  set f = ##class(RestTransfer.FileDesc).%New()   
+  if (f = $$$NULLOREF) {	  
+ 	 do result.%Set("Message", "Couldn't create an instance of class")  
+  } else {     	
+  	set st = f.%JSONImport(%request.Content)  
+ 	If $$$ISOK(st) {
+		set st = f.%Save() 
+		If $$$ISOK(st) {	        
+     	  do result.%Set("Status","OK")           
+		} else {		       
+     	  do result.%Set("Message",$system.Status.GetOneErrorText(st))  
+		}
+  	} else {	       
+   	   do result.%Set("Message",$system.Status.GetOneErrorText(st))  
+  	}
   }
- 
   write result.%ToJSON() 
   Quit st
 }

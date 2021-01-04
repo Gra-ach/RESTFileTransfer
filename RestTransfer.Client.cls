@@ -1,4 +1,4 @@
-Class RestTransfer.Client Extends %ZEN.DataModel.Adaptor
+Class RestTransfer.Client
 {
 
 Parameter Server = "localhost";
@@ -11,10 +11,32 @@ ClassMethod GetLink() As %Net.HttpRequest
 {
 	
  Set request = ##class(%Net.HttpRequest).%New() 		
- Set request.Server = ..%GetParameter("Server")
- Set request.Port = ..%GetParameter("Port")
- set request.ContentType = "application/base64" 		
+ Set request.Server = ..#Server
+ Set request.Port = ..#Port
+ set request.ContentType = "application/octet-stream" 		
  quit request
+}
+
+ClassMethod Base64EncodeStream(pStream As %Stream, Output pEncoded As %Stream) As %Status
+{
+  s tSC=$$$OK
+  try {
+    s tSC=pStream.Rewind()
+    q:$$$ISERR(tSC)
+
+    s pEncoded=##class(%Stream.TmpCharacter).%New()
+    while 'pStream.AtEnd {
+      s tLen=24573 
+      s tSC=pEncoded.Write($system.Encryption.Base64Encode(pStream.Read(.tLen)))
+      q:$$$ISERR(tSC)
+    }
+    q:$$$ISERR(tSC)
+        
+    s tSC=pEncoded.Rewind()
+  } catch (e) {
+    s tSC=e.AsStatus()
+  }
+  q tSC
 }
 
 ClassMethod SendFile(aFileName) As %Status
@@ -24,61 +46,37 @@ ClassMethod SendFile(aFileName) As %Status
   
  set s = ##class(%Stream.FileBinary).%New()
  set s.Filename = aFileName
- 
- if s.Size > 3459000 {   //3641144 max length of the string in IRIS  5%
- 
+  
+ if s.Size > 2000000 {   //3641144 max length of the string in IRIS   
 	do request.EntityBody.Write("{""Name"":"""_s.Filename_""", ""File"":""") 	 
- 	While 's.AtEnd {	
-	    set temp = s.Read(.len, .sc)
-	    do request.EntityBody.Write($ZCONVERT(temp, "O", "RAW"))	    
+ 	While 's.AtEnd {		    
+	    do request.EntityBody.Write($ZCONVERT(s.Read(.len, .sc),"O", "RAW"))
 	    Quit:$System.Status.IsError(sc)
  	} 	
  	do request.EntityBody.Write("""}")   
-	set sc = request.Post("/RestTransfer/json")			
- } else
- {
-	set p = ##class(%ZEN.proxyObject).%New()
+ 	set sc = request.Post("/RestTransfer/json")		
+  } else
+  {
+	set p = {}
  	set p.Name = s.Filename 
- 	While 's.AtEnd {	
-	    set p.File = p.File_s.Read(.len, .sc)	    	    
-		Quit:$System.Status.IsError(sc)
-	} 	
- 	set sc = ##class(%ZEN.Auxiliary.jsonProvider).%WriteJSONStreamFromObject(request.EntityBody, p)
+ 	
+ 	set sc = ..Base64EncodeStream(s, .t)
  	Quit:$System.Status.IsError(sc)
- 	set sc = request.Post("/RestTransfer/jsons")				 
- }
-	 
- Quit:$System.Status.IsError(sc)
+ 	
+ 	While 't.AtEnd {	
+		set p.File = p.File_t.Read(.len, .sc)
+		Quit:$System.Status.IsError(sc)
+ 	}  
+ 	do p.%ToJSON(request.EntityBody) 	
+ 	Quit:$System.Status.IsError(sc) 	 	
+ 	set sc = request.Post("/RestTransfer/jsons")
+  }  
+  Quit:$System.Status.IsError(sc)
  
- Set response=request.HttpResponse
- do response.OutputToDevice()
+  Set response=request.HttpResponse
+  do response.OutputToDevice()
   
- Quit sc
-}
-
-ClassMethod SendFileT(aFileName) As %Status
-{
- Set sc = $$$OK
- Set request = ..GetLink()  
- set s = ##class(%Stream.FileBinary).%New()
- set s.Filename = aFileName 
- 
- set p = ##class(%ZEN.proxyObject).%New()
- set p.Name = s.Filename 
- While 's.AtEnd {	
-	set p.File = p.File_s.Read(.len, .sc)	    	    
-	Quit:$System.Status.IsError(sc)
- } 	
- set sc = ##class(%ZEN.Auxiliary.jsonProvider).%WriteJSONStreamFromObject(request.EntityBody, p)
- Quit:$System.Status.IsError(sc)
- 
- set sc = request.Post("/RestTransfer/jsons")				 
- Quit:$System.Status.IsError(sc)
- 
- Set response=request.HttpResponse
- do response.OutputToDevice()
-  
- Quit sc
+  Quit sc
 }
 
 ClassMethod SendFileDirect(aFileName) As %Status
@@ -103,38 +101,4 @@ ClassMethod SendFileDirect(aFileName) As %Status
  
  Quit sc
 }
-
-ClassMethod Run()
-{
-	
-	/*set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\2020_1012_114732_020.JPG")	      
-	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\Archive.xml")	      
-	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\arc-setup.exe")	      */
-	  	
-   	set resp1=##class(RestTransfer.Client).SendFile("D:\Downloads\Outline Template.pdf")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\Outline Template.pdf")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	
-   	set resp1=##class(RestTransfer.Client).SendFile("D:\Downloads\pic3.png")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)   	
-   	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\pic3.png")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	   	   	
-   	set resp1=##class(RestTransfer.Client).SendFile("D:\Downloads\Archive (1).xml")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\Archive (1).xml")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	
-   	set resp1=##class(RestTransfer.Client).SendFile("D:\Downloads\Imagine Dragons-Thunder.mp3")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\Imagine Dragons-Thunder.mp3")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	
-   	set resp1=##class(RestTransfer.Client).SendFile("D:\Downloads\ffmpeg-win-2.2.2.exe")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-   	set resp1=##class(RestTransfer.Client).SendFileDirect("D:\Downloads\ffmpeg-win-2.2.2.exe")	      
-   	if $$$ISERR(resp1) do $System.OBJ.DisplayError(resp1)
-}
-
 }
