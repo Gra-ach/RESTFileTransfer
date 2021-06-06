@@ -22,6 +22,6 @@ Open IRIS terminal to examine globals:
 $ docker-compose exec iris iris session iris
 USER>write ##class(dc.PackageSample.ObjectScript).Test()
 ```
-Follow ther guidelie as described here    
+Follow the guidelines as described here    
 - [Transferring Files via REST to Store in a Property, Part 1](https://community.intersystems.com/post/transferring-files-rest-store-property-part-1)    
 - [Transferring Files via REST to Store in a Property, Part 2](https://community.intersystems.com/post/transferring-files-rest-store-property-part-2)
