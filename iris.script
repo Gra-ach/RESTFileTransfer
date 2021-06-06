@@ -2,6 +2,17 @@
 
 zn "%SYS"
 Do ##class(Security.Users).UnExpireUserPasswords("*")
+;;
+write !,"setup REST web application",!
+Set props("AutheEnabled") = 64 ; $$$AutheUnauthenticated
+Set props("NameSpace") = "USER"
+Set props("IsNameSpaceDefault") = 0  
+Set props("DispatchClass") = "RestTransfer.Broker"
+Set props("MatchRoles")=":%All"
+Set sc = ##class(Security.Applications).Create("/RestTransfer", .props)
+write !,"Setup of REST application "_$S(sc:"is OK",1:"failed")
+if 'sc do $system.OBJ.DisplayError(sc)  hang 15
+;;
 
 zn "USER"
 zpm "load /opt/irisbuild/ -v":1:1
