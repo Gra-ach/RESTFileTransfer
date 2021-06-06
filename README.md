@@ -1,6 +1,6 @@
 # RESTFileTransfer
 Example of how to transfer files using RESTful services     
-The motivation and teh explanations are avaiaible in these article3 in Develope Commnunity:
+The motivation and teh explanations are avaiaible in these article3 in Develope Commnunity:     
 [Transferring Files via REST to Store in a Property, Part 1](https://community.intersystems.com/post/transferring-files-rest-store-property-part-1)    
 [Transferring Files via REST to Store in a Property, Part 2](https://community.intersystems.com/post/transferring-files-rest-store-property-part-2)
 
