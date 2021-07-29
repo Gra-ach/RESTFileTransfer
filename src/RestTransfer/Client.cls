@@ -3,7 +3,7 @@ Class RestTransfer.Client
 
 Parameter Server = "localhost";
 
-Parameter Port = 52773;
+Parameter Port = 52774;
 
 Parameter Https = 0;
 
@@ -71,7 +71,9 @@ ClassMethod SendFile(aFileName) As %Status
  	Quit:$System.Status.IsError(sc) 	 	
  	set sc = request.Post("/RestTransfer/jsons")
   }  
-  Quit:$System.Status.IsError(sc)
+
+  Quit:$System.Status.IsError(sc) sc
+
  
   Set response=request.HttpResponse
   do response.OutputToDevice()
@@ -94,7 +96,25 @@ ClassMethod SendFileDirect(aFileName) As %Status
  Quit:$System.Status.IsError(sc)
  
  set sc = request.Post("/RestTransfer/file")			
- Quit:$System.Status.IsError(sc)
+ Quit:$System.Status.IsError(sc) sc
+ 
+ Set response=request.HttpResponse
+ do response.OutputToDevice()
+ 
+ Quit sc
+}
+
+ClassMethod SendFileChunked(aFileName) As %Status
+{
+ Set sc = $$$OK  
+ Set request = ..GetLink()
+ 
+ set cw = ##class(RestTransfer.ChunkedWriter).%New()
+ set cw.Filename = aFileName
+ set request.EntityBody = cw
+
+ set sc = request.Post("/RestTransfer/file")			
+ Quit:$System.Status.IsError(sc) sc
  
  Set response=request.HttpResponse
  do response.OutputToDevice()
