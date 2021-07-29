@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="rest-file-transfer.ZPM">
+    <Module>
+      <Name>rest-file-transfer</Name>
+      <Description>Example of how to transfer files using RESTful services</Description>
+      <Version>1.1.0</Version>
+      <Packaging>module</Packaging>
+      <SourcesRoot>src</SourcesRoot>
+      <Resource Name="RestTransfer.PKG"/>
+    </Module>
+  </Document>
+</Export>
