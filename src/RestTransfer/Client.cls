@@ -71,7 +71,9 @@ ClassMethod SendFile(aFileName) As %Status
  	Quit:$System.Status.IsError(sc) 	 	
  	set sc = request.Post("/RestTransfer/jsons")
   }  
+
   Quit:$System.Status.IsError(sc) sc
+
  
   Set response=request.HttpResponse
   do response.OutputToDevice()
