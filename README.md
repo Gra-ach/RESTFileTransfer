@@ -23,7 +23,8 @@ From POSTMAN or ARC client send a **POST** request with your file as **BODY**
 or adding a file name as query parameter     
 - http://localhost:52773//RestTransfer/file?myfile.xyz     
 
-Use SMP or IRIS terminal to examine globals:
+Use SMP > System-Explorer > Globals   
+or IRIS terminal to examine globals:
 ```
 $ docker-compose exec iris iris session iris
 USER>zwriet ^RestTransfer.FileDescD
