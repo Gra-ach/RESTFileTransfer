@@ -18,6 +18,8 @@ ClassMethod InsertFileContents() As %Status
   if (f = $$$NULLOREF) {	  
 	  do result.%Set("Message", "Couldn't create an instance of class")  
   } else {     	 
+#; use query parameter	as file.name        
+        set f.Name=$piece(%request.CgiEnvs("REQUEST_URI"),"?",2)
     	set st = f.File.CopyFrom(%request.Content)       
         If $$$ISOK(st) {
 	       set st = f.%Save() 
