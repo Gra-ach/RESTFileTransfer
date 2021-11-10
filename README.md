@@ -27,7 +27,7 @@ Use SMP > System-Explorer > Globals
 or IRIS terminal to examine globals:
 ```
 $ docker-compose exec iris iris session iris
-USER>zwriet ^RestTransfer.FileDescD
+USER>zwrite ^RestTransfer.FileDescD
 ^RestTransfer.FileDescD=5
 ^RestTransfer.FileDescD(1)=$lb("","1","")
 ^RestTransfer.FileDescD(2)=$lb("","2","")
